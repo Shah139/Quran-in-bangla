@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'controllers/surah_controller.dart';
-import 'views/surah_detail_page.dart';
 import 'views/home_page.dart';
 
 void main() {

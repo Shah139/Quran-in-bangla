@@ -26,7 +26,7 @@ class SurahDetailPage extends StatelessWidget {
           return const Text('সূরা বিবরণ'); // 'Surah Details' in Bangla
         }),
         centerTitle: true,
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.teal,
       ),
       body: Column(
         children: [
@@ -39,7 +39,7 @@ class SurahDetailPage extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: Colors.teal,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -114,12 +114,12 @@ class SurahDetailPage extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: controller.currentAyahIndex.value == index 
-                          ? Colors.blue.withOpacity(0.1) 
+                          ? Colors.teal.withOpacity(0.1) 
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: controller.currentAyahIndex.value == index 
-                            ? Colors.blue 
+                            ? Colors.teal 
                             : Colors.grey.shade300,
                       ),
                     ),
@@ -226,7 +226,7 @@ class SurahDetailPage extends StatelessWidget {
           Obx(() => Slider(
             value: controller.progress.value,
             onChanged: (value) => controller.seekTo(value),
-            activeColor: Colors.blue,
+            activeColor: Colors.teal,
             inactiveColor: Colors.grey[300],
           )),
           
@@ -244,7 +244,7 @@ class SurahDetailPage extends StatelessWidget {
               // Play/Pause button
               Obx(() => Container(
                 decoration: const BoxDecoration(
-                  color: Colors.blue,
+                  color: Colors.teal,
                   shape: BoxShape.circle,
                 ),
                 child: IconButton(

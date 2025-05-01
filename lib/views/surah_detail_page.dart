@@ -61,11 +61,34 @@ class SurahDetailPage extends StatelessWidget {
               ],
             )),
           ),
-          
-          // Bismillah section
-          Container(
+
+          // Ayah content - scrollable
+          Expanded(
+  child: Obx(() {
+    if (controller.isLoading.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    var ayahs = controller.surahData['ayah'] ?? [];
+    if (ayahs.isEmpty) {
+      return const Center(child: Text('No ayahs available'));
+    }
+
+    return ListView.builder(
+      itemCount: ayahs.length + 1, // Added +1 for the Bismillah
+      padding: const EdgeInsets.only(bottom: 100), // Add padding for player
+      itemBuilder: (context, index) {
+        // Bismillah container at index 0
+        if (index == 0) {
+          return Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
             child: Column(
               children: [
                 // Arabic Bismillah
@@ -91,146 +114,139 @@ class SurahDetailPage extends StatelessWidget {
                 ),
               ],
             ),
+          );
+        }
+        
+        // Ayah items with adjusted index
+        final ayahIndex = index - 1;
+        return Obx(() => Container(
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: controller.currentAyahIndex.value == ayahIndex 
+                ? Colors.teal.withOpacity(0.1) 
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: controller.currentAyahIndex.value == ayahIndex 
+                  ? Colors.teal 
+                  : Colors.grey.shade300,
+            ),
           ),
-          
-          // Ayah content - scrollable
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              var ayahs = controller.surahData['ayah'] ?? [];
-              if (ayahs.isEmpty) {
-                return const Center(child: Text('No ayahs available'));
-              }
-
-              return ListView.builder(
-                itemCount: ayahs.length,
-                padding: const EdgeInsets.only(bottom: 100), // Add padding for player
-                itemBuilder: (context, index) {
-                  return Obx(() => Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: controller.currentAyahIndex.value == index 
-                          ? Colors.teal.withOpacity(0.1) 
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: controller.currentAyahIndex.value == index 
-                            ? Colors.teal 
-                            : Colors.grey.shade300,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Ayah number badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            'আয়াত নম্বরঃ ${index + 1}',
-                            style: const TextStyle(
-                              fontFamily: 'SolaimanLipi'
-                            ),
-                          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Ayah number badge
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'আয়াত নম্বরঃ ${ayahIndex + 1}',
+                  style: const TextStyle(
+                    fontFamily: 'SolaimanLipi'
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              // Ayah text/image
+              GestureDetector(
+                onTap: () => controller.playAyah(ayahIndex),
+                child: Center(
+                  child: Image.network(
+                    'https://quran.sayed.page${ayahs[ayahIndex]['img']}',
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / 
+                                loadingProgress.expectedTotalBytes!
+                              : null,
                         ),
-                        const SizedBox(height: 12),
-                        
-                        // Ayah text/image
-                        GestureDetector(
-                          onTap: () => controller.playAyah(index),
-                          child: Center(
-                            child: Image.network(
-                              'https://quran.sayed.page${ayahs[index]['img']}',
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded / 
-                                          loadingProgress.expectedTotalBytes!
-                                        : null,
-                                  ),
-                                );
-                              },
-                              errorBuilder: (context, error, stackTrace) {
-                                // Fallback for when image fails to load
-                                return Container(
-                                  padding: const EdgeInsets.all(16),
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.grey.shade300),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Column(
-                                    children: [
-                                      Text(
-                                        'صورة تعذر تحميلها',
-                                        style: TextStyle(
-                                          fontFamily: 'Scheherazade',
-                                          fontSize: 22,
-                                        ),
-                                        textDirection: TextDirection.rtl,
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        'ছবি লোড করা যায়নি। অডিও চালাতে ট্যাপ করুন।',
-                                        style: TextStyle(
-                                          fontFamily: 'SolaimanLipi',
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback for when image fails to load
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ],
-                    ),
-                  ));
-                },
-              );
-            }),
+                        child: const Column(
+                          children: [
+                            Text(
+                              'صورة تعذر تحميلها',
+                              style: TextStyle(
+                                fontFamily: 'Scheherazade',
+                                fontSize: 22,
+                              ),
+                              textDirection: TextDirection.rtl,
+                            ),
+                            SizedBox(height: 8),
+                            Text(
+                              'ছবি লোড করা যায়নি। অডিও চালাতে ট্যাপ করুন।',
+                              style: TextStyle(
+                                fontFamily: 'SolaimanLipi',
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
+        ));
+      },
+    );
+  }),
+),
         ],
       ),
       bottomNavigationBar: _buildAudioPlayer(),
     );
   }
 
+  
   Widget _buildAudioPlayer() {
-    return Container(
-      height: 100,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, -3),
-          ),
-        ],
-      ),
+  return Container(
+    height: 100,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      boxShadow: [
+        BoxShadow(
+          color: Colors.grey.withOpacity(0.3),
+          spreadRadius: 1,
+          blurRadius: 5,
+          offset: const Offset(0, -3),
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: const EdgeInsets.only(bottom: 18.0),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Progress slider
-          Obx(() => Slider(
-            value: controller.progress.value,
-            onChanged: (value) => controller.seekTo(value),
-            activeColor: Colors.teal,
-            inactiveColor: Colors.grey[300],
+          // Progress slider with slightly reduced size
+          Obx(() => SizedBox(
+            height: 30,
+            child: Slider(
+              value: controller.progress.value,
+              onChanged: (value) => controller.seekTo(value),
+              activeColor: Colors.teal,
+              inactiveColor: Colors.grey[300],
+            ),
           )),
-          
-          // Player controls
+          // Player controls centered
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -267,6 +283,7 @@ class SurahDetailPage extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

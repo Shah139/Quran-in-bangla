@@ -14,6 +14,9 @@ Welcome to the **Quran-in-Bangla** mobile app — a simple and peaceful way to l
 
 ---
 
+## 📸 App UI Previews
+![Showcase](assets/ui.png)
+
 ## 🔗 API Integration
 
 This app uses the [Quran Audio in Bangla API](https://github.com/abusayed0206/banglaquran/tree/main) for fetching surah data.
